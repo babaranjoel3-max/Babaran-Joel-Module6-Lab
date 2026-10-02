@@ -1,32 +1,16 @@
-/* ITP10 Laboratory Activity 3: Student Registration Form with Input Validation
- * Safe to load in Node: DOM code runs only when `document` exists.
- */
-
-/* ---------- Regular expressions ---------- */
 var STUDENT_NUMBER_PATTERN = /^\d{2}-\d{4}-\d{3}$/;
-var EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
-var MOBILE_PATTERN = /^(09|\+639)\d{9}$/;
-var PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!])\S{8,}$/;
+var EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+\.[^\s@.]+$/;
+var MOBILE_PATTERN = /^(09\d{9}|\+639\d{9})$/;
+var PASSWORD_PATTERN = /^(?=\S{8,}$)(?=.*[A-Z])(?=.*\d)(?=.*[@$!]).*$/;
 
-/* ---------- Pure validation functions (no DOM access) ---------- */
-
-/** True only when the trimmed value looks like 24-1234-123. */
 function isValidStudentNumber(value) {
-  if (typeof value !== "string") {
-    return false;
-  }
-  return STUDENT_NUMBER_PATTERN.test(value.trim());
+  return typeof value === "string" && STUDENT_NUMBER_PATTERN.test(value.trim());
 }
 
-/** True only when the password meets every rule. The password is never trimmed. */
 function isValidPassword(value) {
-  if (typeof value !== "string") {
-    return false;
-  }
-  return PASSWORD_PATTERN.test(value);
+  return typeof value === "string" && PASSWORD_PATTERN.test(value);
 }
 
-/* Small helpers used by the page (also pure). */
 function isValidFullName(value) {
   return typeof value === "string" && value.trim().length >= 2;
 }
@@ -39,277 +23,310 @@ function isValidMobileNumber(value) {
   return typeof value === "string" && MOBILE_PATTERN.test(value.trim());
 }
 
-/** Lists the password rules that are not yet met (empty array = all met). */
-function getPasswordProblems(value) {
-  var password = typeof value === "string" ? value : "";
-  var problems = [];
-  if (password.length < 8) {
-    problems.push("at least 8 characters");
-  }
-  if (!/[A-Z]/.test(password)) {
-    problems.push("one uppercase letter");
-  }
-  if (!/\d/.test(password)) {
-    problems.push("one digit");
-  }
-  if (!/[@$!]/.test(password)) {
-    problems.push("one of @, $, or !");
-  }
-  if (/\s/.test(password)) {
-    problems.push("no spaces");
-  }
-  return problems;
-}
-
-/* ---------- Browser behavior ---------- */
 if (typeof document !== "undefined") {
   (function () {
-    function $(id) {
-      return document.getElementById(id);
-    }
+    var form = document.getElementById("registrationForm");
 
-    var form = $("registrationForm");
     if (!form) {
       return;
     }
 
-    var fields = {
-      fullName: $("fullName"),
-      studentNumber: $("studentNumber"),
-      email: $("email"),
-      mobileNumber: $("mobileNumber"),
-      password: $("password"),
-      confirmPassword: $("confirmPassword"),
-      course: $("course"),
-      terms: $("terms")
-    };
+    var fullName = document.getElementById("fullName");
+    var studentNumber = document.getElementById("studentNumber");
+    var email = document.getElementById("email");
+    var mobileNumber = document.getElementById("mobileNumber");
+    var password = document.getElementById("password");
+    var confirmPassword = document.getElementById("confirmPassword");
+    var course = document.getElementById("course");
+    var terms = document.getElementById("terms");
 
-    var errorBoxes = {
-      fullName: $("fullNameError"),
-      studentNumber: $("studentNumberError"),
-      email: $("emailError"),
-      mobileNumber: $("mobileNumberError"),
-      password: $("passwordError"),
-      confirmPassword: $("confirmPasswordError"),
-      course: $("courseError"),
-      terms: $("termsError")
-    };
+    var fullNameError = document.getElementById("fullNameError");
+    var studentNumberError = document.getElementById("studentNumberError");
+    var emailError = document.getElementById("emailError");
+    var mobileNumberError = document.getElementById("mobileNumberError");
+    var passwordError = document.getElementById("passwordError");
+    var confirmPasswordError = document.getElementById("confirmPasswordError");
+    var courseError = document.getElementById("courseError");
+    var termsError = document.getElementById("termsError");
 
-    var passwordFeedback = $("passwordFeedback");
-    var successMessage = $("successMessage");
-    var registrationSummary = $("registrationSummary");
+    var passwordFeedback = document.getElementById("passwordFeedback");
+    var successMessage = document.getElementById("successMessage");
+    var registrationSummary = document.getElementById("registrationSummary");
 
-    /* Show or clear a field's error and keep aria-invalid in sync. */
-    function setError(name, message) {
-      errorBoxes[name].textContent = message;
-      fields[name].setAttribute("aria-invalid", message ? "true" : "false");
+    var summaryName = document.getElementById("summaryName");
+    var summaryStudentNumber = document.getElementById("summaryStudentNumber");
+    var summaryEmail = document.getElementById("summaryEmail");
+    var summaryMobileNumber = document.getElementById("summaryMobileNumber");
+    var summaryCourse = document.getElementById("summaryCourse");
+
+    function setFieldError(field, errorElement, message) {
+      errorElement.textContent = message;
+      field.setAttribute("aria-invalid", message ? "true" : "false");
       return message === "";
     }
 
-    /* Each checker returns true when valid and updates the message. */
-    function checkFullName() {
-      var name = fields.fullName.value.trim();
-      if (name === "") {
-        return setError("fullName", "Enter your full name.");
+    function validateFullName() {
+      var value = fullName.value.trim();
+
+      if (value === "") {
+        return setFieldError(fullName, fullNameError, "Enter your full name.");
       }
-      if (name.length < 2) {
-        return setError("fullName", "Full name must have at least two characters.");
+
+      if (value.length < 2) {
+        return setFieldError(fullName, fullNameError, "Full name must have at least two characters.");
       }
-      return setError("fullName", "");
+
+      return setFieldError(fullName, fullNameError, "");
     }
 
-    function checkStudentNumber() {
-      var value = fields.studentNumber.value.trim();
+    function validateStudentNumber() {
+      var value = studentNumber.value.trim();
+
       if (value === "") {
-        return setError("studentNumber", "Enter your student number.");
+        return setFieldError(studentNumber, studentNumberError, "Enter your student number.");
       }
+
       if (!isValidStudentNumber(value)) {
-        return setError("studentNumber", "Enter a student number in the format 24-1234-123.");
+        return setFieldError(studentNumber, studentNumberError, "Enter a student number in the format 24-1234-123.");
       }
-      return setError("studentNumber", "");
+
+      return setFieldError(studentNumber, studentNumberError, "");
     }
 
-    function checkEmail() {
-      var value = fields.email.value.trim();
+    function validateEmail() {
+      var value = email.value.trim();
+
       if (value === "") {
-        return setError("email", "Enter your email address.");
+        return setFieldError(email, emailError, "Enter your email address.");
       }
+
       if (!isValidEmail(value)) {
-        return setError("email", "Enter an email address like name@example.com.");
+        return setFieldError(email, emailError, "Enter a valid email address.");
       }
-      return setError("email", "");
+
+      return setFieldError(email, emailError, "");
     }
 
-    function checkMobileNumber() {
-      var value = fields.mobileNumber.value.trim();
+    function validateMobileNumber() {
+      var value = mobileNumber.value.trim();
+
       if (value === "") {
-        return setError("mobileNumber", "Enter your mobile number.");
+        return setFieldError(mobileNumber, mobileNumberError, "Enter your mobile number.");
       }
+
       if (!isValidMobileNumber(value)) {
-        return setError("mobileNumber", "Enter a mobile number as 09XXXXXXXXX or +639XXXXXXXXX, without spaces or hyphens.");
+        return setFieldError(
+          mobileNumber,
+          mobileNumberError,
+          "Enter 09XXXXXXXXX or +639XXXXXXXXX without spaces or hyphens."
+        );
       }
-      return setError("mobileNumber", "");
+
+      return setFieldError(mobileNumber, mobileNumberError, "");
     }
 
-    function checkPassword() {
-      var value = fields.password.value;
+    function validatePassword() {
+      var value = password.value;
+
       if (value === "") {
-        return setError("password", "Enter a password.");
+        return setFieldError(password, passwordError, "Enter a password.");
       }
+
       if (!isValidPassword(value)) {
-        return setError("password", "Password needs " + getPasswordProblems(value).join(", ") + ".");
+        return setFieldError(
+          password,
+          passwordError,
+          "Password must be at least 8 characters with one uppercase letter, one digit, and one of @, $, or !, with no spaces."
+        );
       }
-      return setError("password", "");
+
+      return setFieldError(password, passwordError, "");
     }
 
-    function checkConfirmPassword() {
-      var value = fields.confirmPassword.value;
+    function validateConfirmPassword() {
+      var value = confirmPassword.value;
+
       if (value === "") {
-        return setError("confirmPassword", "Confirm your password.");
+        return setFieldError(confirmPassword, confirmPasswordError, "Confirm your password.");
       }
-      if (value !== fields.password.value) {
-        return setError("confirmPassword", "Passwords do not match.");
+
+      if (value !== password.value) {
+        return setFieldError(confirmPassword, confirmPasswordError, "Passwords do not match.");
       }
-      return setError("confirmPassword", "");
+
+      return setFieldError(confirmPassword, confirmPasswordError, "");
     }
 
-    function checkCourse() {
-      var value = fields.course.value;
-      if (value !== "BSIT" && value !== "BSCS") {
-        return setError("course", "Select BSIT or BSCS as your course.");
+    function validateCourse() {
+      if (course.value !== "BSIT" && course.value !== "BSCS") {
+        return setFieldError(course, courseError, "Select BSIT or BSCS as your course.");
       }
-      return setError("course", "");
+
+      return setFieldError(course, courseError, "");
     }
 
-    function checkTerms() {
-      if (!fields.terms.checked) {
-        return setError("terms", "You must agree to the terms to register.");
+    function validateTerms() {
+      if (!terms.checked) {
+        return setFieldError(terms, termsError, "You must agree to the terms to register.");
       }
-      return setError("terms", "");
+
+      return setFieldError(terms, termsError, "");
     }
 
-    /* Live password feedback (text plus color class). */
     function updatePasswordFeedback() {
-      var value = fields.password.value;
+      var value = password.value;
+
       if (value === "") {
         passwordFeedback.textContent = "";
         passwordFeedback.className = "feedback";
         return;
       }
-      var problems = getPasswordProblems(value);
-      if (problems.length === 0) {
+
+      if (isValidPassword(value)) {
         passwordFeedback.textContent = "Password meets all the rules.";
         passwordFeedback.className = "feedback ok";
       } else {
-        passwordFeedback.textContent = "Password still needs: " + problems.join(", ") + ".";
+        passwordFeedback.textContent = "Password does not meet all the required rules.";
         passwordFeedback.className = "feedback bad";
       }
     }
 
-    function hideResults() {
+    function clearSummary() {
       successMessage.textContent = "";
       successMessage.hidden = true;
+
       registrationSummary.hidden = true;
-      $("summaryName").textContent = "";
-      $("summaryStudentNumber").textContent = "";
-      $("summaryEmail").textContent = "";
-      $("summaryMobileNumber").textContent = "";
-      $("summaryCourse").textContent = "";
+
+      summaryName.textContent = "";
+      summaryStudentNumber.textContent = "";
+      summaryEmail.textContent = "";
+      summaryMobileNumber.textContent = "";
+      summaryCourse.textContent = "";
     }
 
-    function showResults() {
-      $("summaryName").textContent = fields.fullName.value.trim();
-      $("summaryStudentNumber").textContent = fields.studentNumber.value.trim();
-      $("summaryEmail").textContent = fields.email.value.trim();
-      $("summaryMobileNumber").textContent = fields.mobileNumber.value.trim();
-      $("summaryCourse").textContent = fields.course.value;
+    function showSummary() {
+      summaryName.textContent = fullName.value.trim();
+      summaryStudentNumber.textContent = studentNumber.value.trim();
+      summaryEmail.textContent = email.value.trim();
+      summaryMobileNumber.textContent = mobileNumber.value.trim();
+      summaryCourse.textContent = course.value;
+
       successMessage.textContent = "Registration details validated successfully!";
       successMessage.hidden = false;
       registrationSummary.hidden = false;
     }
 
-    /* ----- Submit: check every field, then show results only if all pass ----- */
     form.addEventListener("submit", function (event) {
       event.preventDefault();
 
-      // Run every check (no short-circuiting) so all errors appear together.
-      var results = [
-        checkFullName(),
-        checkStudentNumber(),
-        checkEmail(),
-        checkMobileNumber(),
-        checkPassword(),
-        checkConfirmPassword(),
-        checkCourse(),
-        checkTerms()
-      ];
-      var allValid = results.every(function (ok) { return ok; });
+      var valid = true;
 
-      if (allValid) {
-        showResults();
+      if (!validateFullName()) valid = false;
+      if (!validateStudentNumber()) valid = false;
+      if (!validateEmail()) valid = false;
+      if (!validateMobileNumber()) valid = false;
+      if (!validatePassword()) valid = false;
+      if (!validateConfirmPassword()) valid = false;
+      if (!validateCourse()) valid = false;
+      if (!validateTerms()) valid = false;
+
+      if (valid) {
+        showSummary();
       } else {
-        hideResults();
-        // Move keyboard focus to the first invalid field.
-        for (var name in fields) {
-          if (fields[name].getAttribute("aria-invalid") === "true") {
-            fields[name].focus();
+        clearSummary();
+
+        var invalidFields = [
+          fullName,
+          studentNumber,
+          email,
+          mobileNumber,
+          password,
+          confirmPassword,
+          course,
+          terms
+        ];
+
+        for (var i = 0; i < invalidFields.length; i++) {
+          if (invalidFields[i].getAttribute("aria-invalid") === "true") {
+            invalidFields[i].focus();
             break;
           }
         }
       }
     });
 
-    /* ----- Blur: full name ----- */
-    fields.fullName.addEventListener("blur", checkFullName);
+    fullName.addEventListener("blur", validateFullName);
 
-    /* ----- Input: live password feedback ----- */
-    fields.password.addEventListener("input", function () {
+    password.addEventListener("input", function () {
       updatePasswordFeedback();
-      if (fields.password.getAttribute("aria-invalid") === "true") {
-        checkPassword();
+
+      if (password.getAttribute("aria-invalid") === "true") {
+        validatePassword();
       }
-      // Re-check the confirmation if the user has already typed or been flagged.
-      if (fields.confirmPassword.value !== "" ||
-          fields.confirmPassword.getAttribute("aria-invalid") === "true") {
-        checkConfirmPassword();
+
+      if (
+        confirmPassword.value !== "" ||
+        confirmPassword.getAttribute("aria-invalid") === "true"
+      ) {
+        validateConfirmPassword();
       }
     });
 
-    /* ----- Input: once a field was flagged, re-check it as the user corrects it ----- */
-    var recheckOnInput = {
-      fullName: checkFullName,
-      studentNumber: checkStudentNumber,
-      email: checkEmail,
-      mobileNumber: checkMobileNumber,
-      confirmPassword: checkConfirmPassword
-    };
-    Object.keys(recheckOnInput).forEach(function (name) {
-      fields[name].addEventListener("input", function () {
-        if (fields[name].getAttribute("aria-invalid") === "true") {
-          recheckOnInput[name]();
-        }
-      });
+    studentNumber.addEventListener("input", function () {
+      if (studentNumber.getAttribute("aria-invalid") === "true") {
+        validateStudentNumber();
+      }
     });
 
-    /* ----- Change: course and terms ----- */
-    fields.course.addEventListener("change", checkCourse);
-    fields.terms.addEventListener("change", checkTerms);
+    email.addEventListener("input", function () {
+      if (email.getAttribute("aria-invalid") === "true") {
+        validateEmail();
+      }
+    });
 
-    /* ----- Reset: clear every message and output ----- */
+    mobileNumber.addEventListener("input", function () {
+      if (mobileNumber.getAttribute("aria-invalid") === "true") {
+        validateMobileNumber();
+      }
+    });
+
+    confirmPassword.addEventListener("input", function () {
+      if (confirmPassword.getAttribute("aria-invalid") === "true") {
+        validateConfirmPassword();
+      }
+    });
+
+    course.addEventListener("change", validateCourse);
+
+    terms.addEventListener("change", validateTerms);
+
     form.addEventListener("reset", function () {
-      Object.keys(errorBoxes).forEach(function (name) {
-        errorBoxes[name].textContent = "";
-        fields[name].setAttribute("aria-invalid", "false");
-      });
+      fullNameError.textContent = "";
+      studentNumberError.textContent = "";
+      emailError.textContent = "";
+      mobileNumberError.textContent = "";
+      passwordError.textContent = "";
+      confirmPasswordError.textContent = "";
+      courseError.textContent = "";
+      termsError.textContent = "";
+
+      fullName.setAttribute("aria-invalid", "false");
+      studentNumber.setAttribute("aria-invalid", "false");
+      email.setAttribute("aria-invalid", "false");
+      mobileNumber.setAttribute("aria-invalid", "false");
+      password.setAttribute("aria-invalid", "false");
+      confirmPassword.setAttribute("aria-invalid", "false");
+      course.setAttribute("aria-invalid", "false");
+      terms.setAttribute("aria-invalid", "false");
+
       passwordFeedback.textContent = "";
       passwordFeedback.className = "feedback";
-      hideResults();
-      // The browser restores the controls' initial values right after this event.
+
+      clearSummary();
     });
   })();
 }
 
-/* ---------- Export for the Node-based autograder ---------- */
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     isValidStudentNumber: isValidStudentNumber,
