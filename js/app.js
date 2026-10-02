@@ -19,7 +19,6 @@ function isValidFullName(value) {
 }
 
 if (typeof document !== "undefined") {
-
     const form = document.getElementById("registrationForm");
 
     const fullName = document.getElementById("fullName");
@@ -231,7 +230,7 @@ if (typeof document !== "undefined") {
                 "feedback valid-feedback";
         } else {
             passwordFeedback.textContent =
-                "Password must have 8+ characters, an uppercase letter, a digit, and @, $, or !, with no spaces.";
+                "Password must be at least 8 characters, contain an uppercase letter, a digit, and one of @, $, or !, with no spaces.";
             passwordFeedback.className =
                 "feedback invalid-feedback";
         }
@@ -283,14 +282,6 @@ if (typeof document !== "undefined") {
 
     password.addEventListener("input", function () {
         updatePasswordFeedback();
-
-        if (password.value !== "") {
-            validatePassword();
-        }
-
-        if (confirmPassword.value !== "") {
-            validateConfirmPassword();
-        }
     });
 
     fullName.addEventListener("blur", function () {
@@ -323,21 +314,6 @@ if (typeof document !== "undefined") {
 
     form.addEventListener("reset", function () {
         setTimeout(function () {
-            const fields = [
-                fullName,
-                studentNumber,
-                email,
-                mobileNumber,
-                password,
-                confirmPassword,
-                course,
-                terms
-            ];
-
-            fields.forEach(function (field) {
-                field.setAttribute("aria-invalid", "false");
-            });
-
             fullNameError.textContent = "";
             studentNumberError.textContent = "";
             emailError.textContent = "";
@@ -360,24 +336,20 @@ if (typeof document !== "undefined") {
             summaryCourse.textContent = "";
 
             registrationSummary.hidden = true;
+
+            fullName.setAttribute("aria-invalid", "false");
+            studentNumber.setAttribute("aria-invalid", "false");
+            email.setAttribute("aria-invalid", "false");
+            mobileNumber.setAttribute("aria-invalid", "false");
+            password.setAttribute("aria-invalid", "false");
+            confirmPassword.setAttribute("aria-invalid", "false");
+            course.setAttribute("aria-invalid", "false");
+            terms.setAttribute("aria-invalid", "false");
         }, 0);
     });
 
     successMessage.hidden = true;
     registrationSummary.hidden = true;
-
-    [
-        fullName,
-        studentNumber,
-        email,
-        mobileNumber,
-        password,
-        confirmPassword,
-        course,
-        terms
-    ].forEach(function (field) {
-        field.setAttribute("aria-invalid", "false");
-    });
 }
 
 if (typeof module !== "undefined" && module.exports) {
