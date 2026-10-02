@@ -1,307 +1,372 @@
 function isValidStudentNumber(value) {
-  return /^\d{2}-\d{4}-\d{3}$/.test(value.trim());
+    return /^\d{2}-\d{4}-\d{3}$/.test(value.trim());
 }
 
 function isValidPassword(value) {
-  return /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!])[^\s]{8,}$/.test(value);
+    return /^(?=\S{8,}$)(?=.*[A-Z])(?=.*\d)(?=.*[@$!]).*$/.test(value);
 }
 
 function isValidEmail(value) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
 function isValidMobileNumber(value) {
-  return /^(09\d{9}|\+639\d{9})$/.test(value.trim());
+    return /^(09\d{9}|\+639\d{9})$/.test(value.trim());
 }
 
 function isValidFullName(value) {
-  return value.trim().length >= 2;
+    return value.trim().length >= 2;
 }
 
 if (typeof document !== "undefined") {
-  const form = document.getElementById("registrationForm");
 
-  const fullName = document.getElementById("fullName");
-  const studentNumber = document.getElementById("studentNumber");
-  const email = document.getElementById("email");
-  const mobileNumber = document.getElementById("mobileNumber");
-  const password = document.getElementById("password");
-  const confirmPassword = document.getElementById("confirmPassword");
-  const course = document.getElementById("course");
-  const terms = document.getElementById("terms");
+    const form = document.getElementById("registrationForm");
 
-  const successMessage = document.getElementById("successMessage");
-  const registrationSummary = document.getElementById("registrationSummary");
+    const fullName = document.getElementById("fullName");
+    const studentNumber = document.getElementById("studentNumber");
+    const email = document.getElementById("email");
+    const mobileNumber = document.getElementById("mobileNumber");
+    const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirmPassword");
+    const course = document.getElementById("course");
+    const terms = document.getElementById("terms");
 
-  const summaryName = document.getElementById("summaryName");
-  const summaryStudentNumber = document.getElementById("summaryStudentNumber");
-  const summaryEmail = document.getElementById("summaryEmail");
-  const summaryMobileNumber = document.getElementById("summaryMobileNumber");
-  const summaryCourse = document.getElementById("summaryCourse");
+    const fullNameError = document.getElementById("fullNameError");
+    const studentNumberError = document.getElementById("studentNumberError");
+    const emailError = document.getElementById("emailError");
+    const mobileNumberError = document.getElementById("mobileNumberError");
+    const passwordError = document.getElementById("passwordError");
+    const confirmPasswordError = document.getElementById("confirmPasswordError");
+    const courseError = document.getElementById("courseError");
+    const termsError = document.getElementById("termsError");
 
-  const passwordFeedback = document.getElementById("passwordFeedback");
+    const passwordFeedback = document.getElementById("passwordFeedback");
+    const successMessage = document.getElementById("successMessage");
+    const registrationSummary = document.getElementById("registrationSummary");
 
-  function setError(field, errorId, message) {
-    const errorElement = document.getElementById(errorId);
+    const summaryName = document.getElementById("summaryName");
+    const summaryStudentNumber = document.getElementById("summaryStudentNumber");
+    const summaryEmail = document.getElementById("summaryEmail");
+    const summaryMobileNumber = document.getElementById("summaryMobileNumber");
+    const summaryCourse = document.getElementById("summaryCourse");
 
-    errorElement.textContent = message;
-
-    if (message) {
-      field.setAttribute("aria-invalid", "true");
-    } else {
-      field.setAttribute("aria-invalid", "false");
-    }
-  }
-
-  function validateFullName() {
-    const value = fullName.value.trim();
-
-    if (!value) {
-      setError(fullName, "fullNameError", "Full name is required.");
-      return false;
+    function setError(field, errorElement, message) {
+        errorElement.textContent = message;
+        field.setAttribute("aria-invalid", message ? "true" : "false");
     }
 
-    if (value.length < 2) {
-      setError(
-        fullName,
-        "fullNameError",
-        "Full name must contain at least two characters."
-      );
-      return false;
+    function validateFullName() {
+        const value = fullName.value.trim();
+
+        if (value === "") {
+            setError(fullName, fullNameError, "Full name is required.");
+            return false;
+        }
+
+        if (value.length < 2) {
+            setError(
+                fullName,
+                fullNameError,
+                "Full name must contain at least two characters."
+            );
+            return false;
+        }
+
+        setError(fullName, fullNameError, "");
+        return true;
     }
 
-    setError(fullName, "fullNameError", "");
-    return true;
-  }
+    function validateStudentNumber() {
+        const value = studentNumber.value.trim();
 
-  function validateStudentNumber() {
-    const value = studentNumber.value.trim();
+        if (value === "") {
+            setError(
+                studentNumber,
+                studentNumberError,
+                "Student number is required."
+            );
+            return false;
+        }
 
-    if (!value) {
-      setError(
-        studentNumber,
-        "studentNumberError",
-        "Student number is required."
-      );
-      return false;
+        if (!isValidStudentNumber(value)) {
+            setError(
+                studentNumber,
+                studentNumberError,
+                "Enter a student number in the format 24-1234-123."
+            );
+            return false;
+        }
+
+        setError(studentNumber, studentNumberError, "");
+        return true;
     }
 
-    if (!isValidStudentNumber(value)) {
-      setError(
-        studentNumber,
-        "studentNumberError",
-        "Enter a student number in the format 24-1234-123."
-      );
-      return false;
+    function validateEmail() {
+        const value = email.value.trim();
+
+        if (value === "") {
+            setError(email, emailError, "Email address is required.");
+            return false;
+        }
+
+        if (!isValidEmail(value)) {
+            setError(
+                email,
+                emailError,
+                "Enter a valid email address."
+            );
+            return false;
+        }
+
+        setError(email, emailError, "");
+        return true;
     }
 
-    setError(studentNumber, "studentNumberError", "");
-    return true;
-  }
+    function validateMobileNumber() {
+        const value = mobileNumber.value.trim();
 
-  function validateEmail() {
-    const value = email.value.trim();
+        if (value === "") {
+            setError(
+                mobileNumber,
+                mobileNumberError,
+                "Mobile number is required."
+            );
+            return false;
+        }
 
-    if (!value) {
-      setError(email, "emailError", "Email address is required.");
-      return false;
+        if (!isValidMobileNumber(value)) {
+            setError(
+                mobileNumber,
+                mobileNumberError,
+                "Enter a valid mobile number using 09XXXXXXXXX or +639XXXXXXXXX."
+            );
+            return false;
+        }
+
+        setError(mobileNumber, mobileNumberError, "");
+        return true;
     }
 
-    if (!isValidEmail(value)) {
-      setError(
-        email,
-        "emailError",
-        "Enter a valid email address such as student@example.com."
-      );
-      return false;
+    function validatePassword() {
+        if (password.value === "") {
+            setError(password, passwordError, "Password is required.");
+            return false;
+        }
+
+        if (!isValidPassword(password.value)) {
+            setError(
+                password,
+                passwordError,
+                "Password must be at least 8 characters, contain one uppercase letter, one digit, and one of @, $, or !, with no spaces."
+            );
+            return false;
+        }
+
+        setError(password, passwordError, "");
+        return true;
     }
 
-    setError(email, "emailError", "");
-    return true;
-  }
+    function validateConfirmPassword() {
+        if (confirmPassword.value === "") {
+            setError(
+                confirmPassword,
+                confirmPasswordError,
+                "Confirm password is required."
+            );
+            return false;
+        }
 
-  function validateMobileNumber() {
-    const value = mobileNumber.value.trim();
+        if (confirmPassword.value !== password.value) {
+            setError(
+                confirmPassword,
+                confirmPasswordError,
+                "Passwords do not match."
+            );
+            return false;
+        }
 
-    if (!value) {
-      setError(
-        mobileNumber,
-        "mobileNumberError",
-        "Mobile number is required."
-      );
-      return false;
+        setError(confirmPassword, confirmPasswordError, "");
+        return true;
     }
 
-    if (!isValidMobileNumber(value)) {
-      setError(
-        mobileNumber,
-        "mobileNumberError",
-        "Enter a mobile number beginning with 09 or +639 followed by nine digits."
-      );
-      return false;
+    function validateCourse() {
+        if (course.value !== "BSIT" && course.value !== "BSCS") {
+            setError(
+                course,
+                courseError,
+                "Please select BSIT or BSCS."
+            );
+            return false;
+        }
+
+        setError(course, courseError, "");
+        return true;
     }
 
-    setError(mobileNumber, "mobileNumberError", "");
-    return true;
-  }
+    function validateTerms() {
+        if (!terms.checked) {
+            setError(
+                terms,
+                termsError,
+                "You must agree to the terms and conditions."
+            );
+            return false;
+        }
 
-  function validatePassword() {
-    if (!password.value) {
-      setError(password, "passwordError", "Password is required.");
-      return false;
+        setError(terms, termsError, "");
+        return true;
     }
 
-    if (!isValidPassword(password.value)) {
-      setError(
-        password,
-        "passwordError",
-        "Password must be at least 8 characters, contain one uppercase letter, one digit, and one of @, $, or !, with no spaces."
-      );
-      return false;
+    function updatePasswordFeedback() {
+        if (password.value === "") {
+            passwordFeedback.textContent = "";
+            passwordFeedback.className = "feedback";
+            return;
+        }
+
+        if (isValidPassword(password.value)) {
+            passwordFeedback.textContent =
+                "Password meets all requirements.";
+            passwordFeedback.className =
+                "feedback valid-feedback";
+        } else {
+            passwordFeedback.textContent =
+                "Password must have 8+ characters, an uppercase letter, a digit, and @, $, or !, with no spaces.";
+            passwordFeedback.className =
+                "feedback invalid-feedback";
+        }
     }
 
-    setError(password, "passwordError", "");
-    return true;
-  }
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
 
-  function validateConfirmPassword() {
-    if (!confirmPassword.value) {
-      setError(
-        confirmPassword,
-        "confirmPasswordError",
-        "Please confirm your password."
-      );
-      return false;
-    }
+        const validFullName = validateFullName();
+        const validStudentNumber = validateStudentNumber();
+        const validEmail = validateEmail();
+        const validMobileNumber = validateMobileNumber();
+        const validPassword = validatePassword();
+        const validConfirmPassword = validateConfirmPassword();
+        const validCourse = validateCourse();
+        const validTerms = validateTerms();
 
-    if (confirmPassword.value !== password.value) {
-      setError(
-        confirmPassword,
-        "confirmPasswordError",
-        "Passwords do not match."
-      );
-      return false;
-    }
+        updatePasswordFeedback();
 
-    setError(confirmPassword, "confirmPasswordError", "");
-    return true;
-  }
+        const formIsValid =
+            validFullName &&
+            validStudentNumber &&
+            validEmail &&
+            validMobileNumber &&
+            validPassword &&
+            validConfirmPassword &&
+            validCourse &&
+            validTerms;
 
-  function validateCourse() {
-    if (course.value !== "BSIT" && course.value !== "BSCS") {
-      setError(
-        course,
-        "courseError",
-        "Please select BSIT or BSCS."
-      );
-      return false;
-    }
+        if (!formIsValid) {
+            successMessage.textContent = "";
+            successMessage.hidden = true;
+            registrationSummary.hidden = true;
+            return;
+        }
 
-    setError(course, "courseError", "");
-    return true;
-  }
+        summaryName.textContent = fullName.value.trim();
+        summaryStudentNumber.textContent = studentNumber.value.trim();
+        summaryEmail.textContent = email.value.trim();
+        summaryMobileNumber.textContent = mobileNumber.value.trim();
+        summaryCourse.textContent = course.value;
 
-  function validateTerms() {
-    if (!terms.checked) {
-      setError(
-        terms,
-        "termsError",
-        "You must agree to the terms and conditions."
-      );
-      return false;
-    }
+        successMessage.textContent =
+            "Registration details validated successfully!";
 
-    setError(terms, "termsError", "");
-    return true;
-  }
+        successMessage.hidden = false;
+        registrationSummary.hidden = false;
+    });
 
-  function updatePasswordFeedback() {
-    if (!password.value) {
-      passwordFeedback.textContent = "";
-      return;
-    }
+    password.addEventListener("input", function () {
+        updatePasswordFeedback();
 
-    if (isValidPassword(password.value)) {
-      passwordFeedback.textContent = "Password meets all requirements.";
-      passwordFeedback.style.color = "#146c43";
-    } else {
-      passwordFeedback.textContent =
-        "Password needs 8+ characters, an uppercase letter, a digit, and @, $, or !, with no spaces.";
-      passwordFeedback.style.color = "#b00020";
-    }
-  }
+        if (password.value !== "") {
+            validatePassword();
+        }
 
-  form.addEventListener("submit", function (event) {
-    event.preventDefault();
+        if (confirmPassword.value !== "") {
+            validateConfirmPassword();
+        }
+    });
 
-    const validFullName = validateFullName();
-    const validStudentNumber = validateStudentNumber();
-    const validEmail = validateEmail();
-    const validMobileNumber = validateMobileNumber();
-    const validPassword = validatePassword();
-    const validConfirmPassword = validateConfirmPassword();
-    const validCourse = validateCourse();
-    const validTerms = validateTerms();
+    fullName.addEventListener("blur", function () {
+        validateFullName();
+    });
 
-    updatePasswordFeedback();
+    course.addEventListener("change", function () {
+        validateCourse();
+    });
 
-    const isValid =
-      validFullName &&
-      validStudentNumber &&
-      validEmail &&
-      validMobileNumber &&
-      validPassword &&
-      validConfirmPassword &&
-      validCourse &&
-      validTerms;
+    terms.addEventListener("change", function () {
+        validateTerms();
+    });
 
-    if (!isValid) {
-      successMessage.textContent = "";
-      registrationSummary.hidden = true;
-      return;
-    }
+    studentNumber.addEventListener("blur", function () {
+        validateStudentNumber();
+    });
 
-    summaryName.textContent = fullName.value.trim();
-    summaryStudentNumber.textContent = studentNumber.value.trim();
-    summaryEmail.textContent = email.value.trim();
-    summaryMobileNumber.textContent = mobileNumber.value.trim();
-    summaryCourse.textContent = course.value;
+    email.addEventListener("blur", function () {
+        validateEmail();
+    });
 
-    successMessage.textContent =
-      "Registration details validated successfully!";
+    mobileNumber.addEventListener("blur", function () {
+        validateMobileNumber();
+    });
 
-    registrationSummary.hidden = false;
-  });
+    confirmPassword.addEventListener("blur", function () {
+        validateConfirmPassword();
+    });
 
-  password.addEventListener("input", function () {
-    updatePasswordFeedback();
-    validatePassword();
+    form.addEventListener("reset", function () {
+        setTimeout(function () {
+            const fields = [
+                fullName,
+                studentNumber,
+                email,
+                mobileNumber,
+                password,
+                confirmPassword,
+                course,
+                terms
+            ];
 
-    if (confirmPassword.value) {
-      validateConfirmPassword();
-    }
-  });
+            fields.forEach(function (field) {
+                field.setAttribute("aria-invalid", "false");
+            });
 
-  fullName.addEventListener("blur", function () {
-    validateFullName();
-  });
+            fullNameError.textContent = "";
+            studentNumberError.textContent = "";
+            emailError.textContent = "";
+            mobileNumberError.textContent = "";
+            passwordError.textContent = "";
+            confirmPasswordError.textContent = "";
+            courseError.textContent = "";
+            termsError.textContent = "";
 
-  course.addEventListener("change", function () {
-    validateCourse();
-  });
+            passwordFeedback.textContent = "";
+            passwordFeedback.className = "feedback";
 
-  terms.addEventListener("change", function () {
-    validateTerms();
-  });
+            successMessage.textContent = "";
+            successMessage.hidden = true;
 
-  studentNumber.addEventListener("blur", validateStudentNumber);
-  email.addEventListener("blur", validateEmail);
-  mobileNumber.addEventListener("blur", validateMobileNumber);
-  confirmPassword.addEventListener("blur", validateConfirmPassword);
+            summaryName.textContent = "";
+            summaryStudentNumber.textContent = "";
+            summaryEmail.textContent = "";
+            summaryMobileNumber.textContent = "";
+            summaryCourse.textContent = "";
 
-  form.addEventListener("reset", function () {
-    setTimeout(function () {
-      const fields = [
+            registrationSummary.hidden = true;
+        }, 0);
+    });
+
+    successMessage.hidden = true;
+    registrationSummary.hidden = true;
+
+    [
         fullName,
         studentNumber,
         email,
@@ -310,49 +375,14 @@ if (typeof document !== "undefined") {
         confirmPassword,
         course,
         terms
-      ];
-
-      fields.forEach(function (field) {
+    ].forEach(function (field) {
         field.setAttribute("aria-invalid", "false");
-      });
-
-      document.querySelectorAll(".error").forEach(function (error) {
-        error.textContent = "";
-      });
-
-      passwordFeedback.textContent = "";
-      successMessage.textContent = "";
-
-      registrationSummary.hidden = true;
-
-      summaryName.textContent = "";
-      summaryStudentNumber.textContent = "";
-      summaryEmail.textContent = "";
-      summaryMobileNumber.textContent = "";
-      summaryCourse.textContent = "";
-    }, 0);
-  });
-
-  registrationSummary.hidden = true;
-  successMessage.textContent = "";
-
-  [
-    fullName,
-    studentNumber,
-    email,
-    mobileNumber,
-    password,
-    confirmPassword,
-    course,
-    terms
-  ].forEach(function (field) {
-    field.setAttribute("aria-invalid", "false");
-  });
+    });
 }
 
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = {
-    isValidStudentNumber,
-    isValidPassword
-  };
+    module.exports = {
+        isValidStudentNumber,
+        isValidPassword
+    };
 }
